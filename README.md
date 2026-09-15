@@ -1,49 +1,67 @@
-**Project Code Repository**
-This repository contains the Python scripts and Jupyter notebooks used to preprocess the OASIS-1 MRI dataset, fine-tune the DDPM generative model, calculate evaluation metrics (FID), and train downstream classifiers.
+# Synthetic Brain MRI Generation for Alzheimer's Disease Using Diffusion Models
 
-Note: Due to file size limitations, the fine-tuned model weights and the raw and preprocessed MRI datasets are stored in cloud storage and are not included directly in this zip file.
+An end-to-end deep learning framework for generating, evaluating, and classifying synthetic 2D coronal brain MRI slices targeting the anterior hippocampal formation. This project fine-tunes a Denoising Diffusion Probabilistic Model (DDPM) on the OASIS-1 dataset, compares noise schedule behaviors, introduces a domain-specific RadImageNet FID metric, and evaluates diagnostic utility through patient-isolated downstream classification.
 
-• **Main Notebooks/code:** (using google collab)
-**1. DDPM coronal (linear).ipynb**
-This is the main project notebook. It contains the code for fine-tuning the 2D DDPM model using a linear noise schedule. It also includes the synthetic image generation pipeline, the correlation study, and the FID score calculations.
+---
 
+## 📌 Project Summary
 
-**2. Noise Schedule Ablation.ipynb**
-This notebook contains the code for the noise schedule ablation experiment. It compares generated output quality and calculates FID scores across three distinct setups: Cosine (T=1000), Linear (T=1000), and Cosine (T=500).
+* **Task**: Synthetic 2D Coronal MRI Generation & Downstream Alzheimer's Classification
+* **Dataset**: OASIS-1 Neuroimaging Dataset (T1-weighted volumes registered in T88 space)
+* **Generative Model**: Fine-tuned 2D DDPM backbone (`benetraco/brain_ddpm_128`)
+* **Evaluation Metrics**: Dual-feature FID (Standard ImageNet vs. Domain-specific RadImageNet)
+* **Downstream Classifiers**: Patient-isolated ResNet50 (RadImageNet), ResNet18 (ImageNet), and SimpleCNN
 
-**3. RadnetFID+Classifier(linear).ipynb**
-This notebook handles the domain-specific evaluation and classification experiments. It computes the FID scores using RadImageNet feature extractions and trains/evaluates the main RadImageNet-pretrained ResNet50 classifier across the baseline and augmented dataset configurations.
+---
 
+## 🛠️ Repository Architecture & Code Files
 
-• **Misc folder/codes** 
-**4. preprocess- 3D to 2D coronal.py** (local python file)
-A utility script used to load the raw 3D T1-weighted OASIS-1 volumes registered in T88 space, slice them along the coronal plane (y=95 to y=115), apply min-max intensity normalization, and save the extracted 2D cross-sections as PNG files.
+### Main Notebooks (`/`)
+* **`DDPM coronal (linear).ipynb`**: Main project notebook. Contains the 2D DDPM fine-tuning pipeline under a linear noise schedule, synthetic image generation, correlation analysis, and standard FID score calculations[cite: 6].
+* **`Noise Schedule Ablation.ipynb`**: Ablation experiment comparing output quality and FID scores across three noise configurations: Cosine ($T=1000$), Linear ($T=1000$), and Cosine ($T=500$)[cite: 6].
+* **`RadnetFID+Classifier(linear).ipynb`**: Domain-specific evaluation notebook. Extracts features via RadImageNet to compute clinical-grade FID scores, and trains/evaluates the primary RadImageNet-pretrained ResNet50 classifier across three data configurations[cite: 5, 6].
 
-**5. CNN+Resnet18 classifie.ipynb**
-Contains the baseline classification code for evaluating dataset configurations using the simpler SimpleCNN and standard ImageNet-pretrained ResNet18 architectures.
+### Miscellaneous & Utilities (`/misc`)
+* **`preprocess- 3D to 2D coronal.py`**: Python script to load raw 3D T1 OASIS-1 volumes, extract 2D coronal cross-sections ($y=95$ to $y=115$), perform min-max intensity normalization, and output PNG images[cite: 6].
+* **`CNN+Resnet18 classifie.ipynb`**: Baseline classification scripts evaluating dataset configurations using SimpleCNN and standard ImageNet-pretrained ResNet18[cite: 6].
 
-• **Enviornment**: Python 3.9+ and the required dependencies specified in code files, A CUDA-enabled GPU (NVIDIA GPU with at least 12GB VRAM recommended) is required to run the fine-tuning, image generation, and classification training notebooks within a reasonable timeframe.
+---
 
-• Publicly available libraries and pre-trained weights were integrated as follows:
+## ⚙️ Hardware & Environment
 
-Hugging Face Diffusers & PyTorch: The DDPM implementation relies on diffusers.UNet2DModel and diffusers.DDPMScheduler.
-Pre-trained Weights: The base model was initialized using generic brain MRI DDPM weights (benetraco/brain_ddpm_128) hosted on Hugging Face.
-RadImageNet Feature Extractor: The domain-specific FID calculations and ResNet50 classifier utilize pre-trained RadImageNet weights (RadImageNet-ResNet50-PyTorch).
-SciPy & NumPy: Fréchet distance calculation relies on matrix square root functions from scipy.linalg (sqrtm) and matrix utilities from numpy.
+* **Python Version**: `Python 3.9+`[cite: 6]
+* **Compute Target**: NVIDIA GPU with $\ge 12\text{GB}$ VRAM (Google Colab T4 environment used)[cite: 5, 6]
+* **Core Libraries**: PyTorch, Hugging Face `diffusers`, `torchvision`, `scikit-learn`, `scipy`, `numpy`, `nibabel`, `PIL`, `pandas`[cite: 5, 6]
 
-• **How to run code:**
-1. Preprocessing (Optional):
-If working from raw OASIS-1 3D Analyze volumes files, run the preprocessing script to generate 2D coronal slices
-2.  Main DDPM Fine-Tuning & Generation:
-Open and run DDPM coronal (linear).ipynb sequentially. This notebook loads the 2D slices, fine-tunes the UNet model using a linear noise schedule, generates synthetic samples, and computes standard FID scores.
-3.  Ablation Study:
-To reproduce the noise schedule ablation experiments, run Noise Schedule Ablation.ipynb. This tests performance across Cosine (T=500,T=1000) and Linear (T=1000) parameters.
-4.  RadImageNet FID & Primary Classification:
-Run RadnetFID+Classifier(linear).ipynb to compute domain-adapted RadImageNet FID metrics and train the primary ResNet50 classifier across Configurations
-5.  Baseline Classifiers (Misc):
-Run misc/CNN+Resnet18 classifie.ipynb to train and evaluate the alternative SimpleCNN and standard ImageNet ResNet18 models.
+---
 
-• **Documentation of AI Tool Usage**
-• AI Assistance: Google Gemini and Anthropic Claude were used during this project. Claude provided assistance with debugging PyTorch scripts and assisting pre-trained model implementations, filter for generation of synthetic image, Loading weights from Huggingface for Radnetimage to local ResNet50 and refining code for variations in ablation study.
+## 📥 External Pretrained Weights & Resources
 
-• Documentation Location: Detailed declarations regarding AI tool usage, specific prompts, and scope of assistance are recorded in the code files and AI Declaration section of the official coversheet submitted alongside this repository.
+* **Generative Base Weights**: `benetraco/brain_ddpm_128` (Hugging Face)[cite: 6]
+* **Domain Feature Extractor**: RadImageNet ResNet50 weights (`Lab-Rasool/RadImageNet`)[cite: 5, 6]
+* **Distance Matrix Computations**: `scipy.linalg.sqrtm`[cite: 5, 6]
+
+---
+
+## 🚀 Execution Guide
+
+1. **Preprocessing (Optional)**
+   Run `misc/preprocess- 3D to 2D coronal.py` to convert raw 3D OASIS-1 Analyze volumes into normalized 2D coronal PNG slices[cite: 6].
+
+2. **DDPM Fine-Tuning & Generation**
+   Run `DDPM coronal (linear).ipynb` sequentially to load slices, fine-tune the UNet backbone, generate synthetic samples, and compute standard FID scores[cite: 6].
+
+3. **Noise Schedule Ablation**
+   Run `Noise Schedule Ablation.ipynb` to evaluate generative performance across Cosine and Linear variance schedules[cite: 6].
+
+4. **RadImageNet FID & Primary Classification**
+   Run `RadnetFID+Classifier(linear).ipynb` to extract domain-adapted medical features, calculate RadImageNet FID, and train the RadImageNet-ResNet50 classifier[cite: 5, 6].
+
+5. **Baseline Classifiers**
+   Run `misc/CNN+Resnet18 classifie.ipynb` to execute baseline performance benchmarks on SimpleCNN and standard ResNet18[cite: 6].
+
+---
+
+## 🤖 AI Tool Usage Declaration
+
+AI assistants (Google Gemini and Anthropic Claude) were utilized during development for code refactoring, PyTorch debugging, Hugging Face weight mapping (remapping RadImageNet parameters to torchvision models), noise ablation setups, and synthetic filtering logic[cite: 5, 6]. Specific prompts and scopes are documented in project headers and official academic coversheets[cite: 6].
